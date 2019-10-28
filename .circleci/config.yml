@@ -101,7 +101,7 @@ workflows:
       # non-master branches deploy to stage named by the branch
       - deploy-service:
           name: Deploy Plugins API
-          service_path: flex-plugins
+          service_path: /
           stage_name: ${CIRCLE_BRANCH}
           context: Development
           filters:
@@ -111,7 +111,7 @@ workflows:
       # master branch deploy to the 'prod' stage
       - deploy-service:
           name: Deploy Plugins API
-          service_path: flex-plugins
+          service_path: /
           stage_name: prod
           context: Production
           filters:
@@ -122,7 +122,7 @@ workflows:
       # remove non-production stages
       - remove-service:
           name: Remove Plugins API
-          service_path: flex-plugins
+          service_path: /
           stage_name: ${CIRCLE_TAG:9}
           context: Development
           filters:
