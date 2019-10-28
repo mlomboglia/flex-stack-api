@@ -10,6 +10,13 @@ plugins:
   - serverless-offline
   - serverless-dotenv-plugin # Load .env as environment variables
 
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
+  # Set the table name here so we can use it while testing locally
+  tableName: ${self:custom.stage}-flex-plugins
+
 provider:
   name: aws
   runtime: nodejs10.x
@@ -20,14 +27,39 @@ provider:
   # the following line. Also, make sure to not
   # commit your .env.
   #
-  #environment:
-  #  sampleEnvVar: ${env:SAMPLE_ENV_VAR}
+  environment:
+    tableName: ${self:custom.tableName}
+    accountSid: ${env:ACCOUNT_SID}
+
+  #'iamRoleStatements' defines the permission policy for the Lambda function.
+  # In this case Lambda functions are granted with permissions to access DynamoDB.
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      # Restrict our IAM role permissions to
+      # the specific table for the stage
+      Resource:
+        - "Fn::GetAtt": [ FlexPluginsTable, Arn ]
 
 functions:
-  list-plugins:
-    handler: list-plugins.main
+  list:
+    handler: list.main
     events:
       - http:
-          path: list-plugins
-          method: get
+          path: flex-plugins
+          method: post
           cors: true
+
+# Create our resources with separate CloudFormation templates
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+  # DynamoDB
+  - ${file(resources/dynamodb-table.yml)}
