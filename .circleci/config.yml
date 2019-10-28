@@ -16,7 +16,6 @@ jobs:
           name: Check Pull Request
           command: |
             if [[ ! -z "$CIRCLE_PULL_REQUEST" ]]; then
-              # parse pr# from URL https://github.com/fwang/sls-monorepo-with-circleci/pull/1
               PR_NUMBER=${CIRCLE_PULL_REQUEST##*/}
               echo "export PR_NUMBER=$PR_NUMBER" >> $BASH_ENV
               echo "Pull request #$PR_NUMBER"
@@ -30,7 +29,7 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+            - dependencies-cache-{{ checksum "package-lock.json" }}
             - dependencies-cache
 
       - run:
@@ -56,7 +55,7 @@ jobs:
           paths:
             - node_modules
             - << parameters.service_path >>/node_modules
-          key: dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+          key: dependencies-cache-{{ checksum "package-lock.json" }}
 
   remove-service:
     docker:
@@ -71,7 +70,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+            - dependencies-cache-{{ checksum "package-lock.json" }}
             - dependencies-cache
 
       - run:
@@ -94,7 +93,7 @@ jobs:
           paths:
             - node_modules
             - << parameters.service_path >>/node_modules
-          key: dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+          key: dependencies-cache-{{ checksum "package-lock.json" }}
 
 workflows:
   build-deploy:
