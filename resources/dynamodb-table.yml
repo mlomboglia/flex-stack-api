@@ -4,14 +4,14 @@ Resources:
     Properties:
       TableName: ${self:custom.tableName}
       AttributeDefinitions:
-        - AttributeName: userId
+        - AttributeName: name
           AttributeType: S
-        - AttributeName: noteId
+        - AttributeName: version
           AttributeType: S
       KeySchema:
-        - AttributeName: userId
+        - AttributeName: name
           KeyType: HASH
-        - AttributeName: noteId
+        - AttributeName: version
           KeyType: RANGE
       # Set the capacity to auto-scale
       BillingMode: PAY_PER_REQUEST

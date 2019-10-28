@@ -15,12 +15,9 @@ export async function main(event, context) {
 
         const params = {
             TableName: process.env.tableName,
-            KeyConditionExpression: "account_sid = :account_sid",
-            ExpressionAttributeValues: {
-                ":account_sid": process.env.accountSid
-            }
+            Limit: 50
         };
-        const result = await dynamoDbLib.call("query", params);
+        const result = await dynamoDbLib.call("scan", params);
         return success(result.Items);
 
     } catch (err) {
