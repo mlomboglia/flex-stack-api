@@ -1,0 +1,133 @@
+version: 2.1
+
+jobs:
+  deploy-service:
+    docker:
+      - image: circleci/node:8.10
+    parameters:
+      service_path:
+        type: string
+      stage_name:
+        type: string
+    steps:
+      - checkout
+
+      - run:
+          name: Check Pull Request
+          command: |
+            if [[ ! -z "$CIRCLE_PULL_REQUEST" ]]; then
+              # parse pr# from URL https://github.com/fwang/sls-monorepo-with-circleci/pull/1
+              PR_NUMBER=${CIRCLE_PULL_REQUEST##*/}
+              echo "export PR_NUMBER=$PR_NUMBER" >> $BASH_ENV
+              echo "Pull request #$PR_NUMBER"
+            fi
+      - run:
+          name: Merge Pull Request
+          command: |
+            if [[ ! -z "$PR_NUMBER" ]]; then
+              git fetch origin +refs/pull/$PR_NUMBER/merge
+              git checkout -qf FETCH_HEAD
+            fi
+      - restore_cache:
+          keys:
+            - dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+            - dependencies-cache
+
+      - run:
+          name: Install Serverless CLI
+          command: sudo npm i -g serverless
+            
+      - run:
+          name: Install dependencies
+          command: |
+            npm install
+            cd << parameters.service_path >>
+            npm install
+      - run:
+          name: Deploy application
+          command: |
+            cd << parameters.service_path >>
+            if [[ ! -z "$PR_NUMBER" ]]; then
+              sls deploy -s pr$PR_NUMBER
+            else
+              sls deploy -s << parameters.stage_name >>
+            fi
+      - save_cache:
+          paths:
+            - node_modules
+            - << parameters.service_path >>/node_modules
+          key: dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+
+  remove-service:
+    docker:
+      - image: circleci/node:8.10
+    parameters:
+      service_path:
+        type: string
+      stage_name:
+        type: string
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+            - dependencies-cache
+
+      - run:
+          name: Install Serverless CLI
+          command: sudo npm i -g serverless
+            
+      - run:
+          name: Install dependencies
+          command: |
+            npm install
+            cd << parameters.service_path >>
+            npm install
+      - run:
+          name: Remove application
+          command: |
+            cd << parameters.service_path >>
+            # parse stage name from TAG rm-stage-pr1
+            sls remove -s << parameters.stage_name >>
+      - save_cache:
+          paths:
+            - node_modules
+            - << parameters.service_path >>/node_modules
+          key: dependencies-cache-{{ checksum "package-lock.json" }}-{{ checksum "<< parameters.service_path >>/package-lock.json" }}
+
+workflows:
+  build-deploy:
+    jobs:
+      # non-master branches deploy to stage named by the branch
+      - deploy-service:
+          name: Deploy Plugins API
+          service_path: flex-plugins
+          stage_name: ${CIRCLE_BRANCH}
+          context: Development
+          filters:
+            branches:
+              ignore: master
+
+      # master branch deploy to the 'prod' stage
+      - deploy-service:
+          name: Deploy Plugins API
+          service_path: flex-plugins
+          stage_name: prod
+          context: Production
+          filters:
+            branches:
+              only: master
+
+
+      # remove non-production stages
+      - remove-service:
+          name: Remove Plugins API
+          service_path: flex-plugins
+          stage_name: ${CIRCLE_TAG:9}
+          context: Development
+          filters:
+            tags:
+              only: /^rm-stage-.*/
+            branches:
+              ignore: /.*/
