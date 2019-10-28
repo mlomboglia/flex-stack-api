@@ -40,8 +40,6 @@ jobs:
           name: Install dependencies
           command: |
             npm install
-            cd << parameters.service_path >>
-            npm install
       - run:
           name: Deploy application
           command: |
@@ -54,7 +52,6 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-            - << parameters.service_path >>/node_modules
           key: dependencies-cache-{{ checksum "package-lock.json" }}
 
   remove-service:
@@ -81,8 +78,6 @@ jobs:
           name: Install dependencies
           command: |
             npm install
-            cd << parameters.service_path >>
-            npm install
       - run:
           name: Remove application
           command: |
@@ -92,7 +87,6 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-            - << parameters.service_path >>/node_modules
           key: dependencies-cache-{{ checksum "package-lock.json" }}
 
 workflows:
