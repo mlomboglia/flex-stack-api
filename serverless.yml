@@ -29,7 +29,9 @@ provider:
   #
   environment:
     tableName: ${self:custom.tableName}
-    accountSid: ${env:ACCOUNT_SID}
+    ACCOUNT_SID: ${env:ACCOUNT_SID}
+    AUTH_TOKEN: ${env:AUTH_TOKEN}
+
 
   #'iamRoleStatements' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
