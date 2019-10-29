@@ -55,8 +55,6 @@ jobs:
     docker:
       - image: circleci/node:8.10
     parameters:
-      service_path:
-        type: string
       stage_name:
         type: string
     steps:
