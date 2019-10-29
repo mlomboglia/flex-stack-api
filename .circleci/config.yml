@@ -86,10 +86,10 @@ jobs:
 workflows:
   build-deploy:
     jobs:
-      # non-master branches deploy to stage named by the branch
+      # non-master branches deploy to the 'dev' stage
       - deploy-service:
           name: Deploy Plugins API
-          stage_name: ${CIRCLE_BRANCH}
+          stage_name: dev
           context: Development
           filters:
             branches:
