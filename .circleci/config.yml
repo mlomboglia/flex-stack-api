@@ -32,7 +32,7 @@ jobs:
 
       - run:
           name: Install Serverless CLI
-          command: sudo npm i -g serverless
+          command: sudo npm i -g serverless 
             
       - run:
           name: Install dependencies
@@ -40,12 +40,8 @@ jobs:
             npm install
       - run:
           name: Deploy application
-          command: |
-            if [[ ! -z "$PR_NUMBER" ]]; then
-              sls deploy -s pr$PR_NUMBER
-            else
-              sls deploy -s << parameters.stage_name >>
-            fi
+          command: 
+            sls deploy -s << parameters.stage_name >>
       - save_cache:
           paths:
             - node_modules
@@ -98,7 +94,7 @@ workflows:
       # master branch deploy to the 'prod' stage
       - deploy-service:
           name: Deploy Plugins API
-          stage_name: prod
+          stage_name: prd
           context: Production
           filters:
             branches:
