@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Deploy application
           command: 
-            sls deploy -s << parameters.stage_name >>
+            sls deploy -s << parameters.stage_name >> --fix
       - save_cache:
           paths:
             - node_modules
@@ -73,7 +73,7 @@ jobs:
           name: Remove application
           command: |
             # parse stage name from TAG rm-stage-pr1
-            sls remove -s << parameters.stage_name >>
+            sls remove -s << parameters.stage_name >> --fix
       - save_cache:
           paths:
             - node_modules

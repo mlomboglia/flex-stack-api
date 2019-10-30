@@ -20,7 +20,7 @@ export async function main(event, context) {
         const result = await dynamoDbLib.call("scan", params);
         return success(result.Items);
 
-    } catch (err) {  
+    } catch (err) {
         console.log(err);
         return failure(err);
     }
