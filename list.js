@@ -19,7 +19,7 @@ export async function main(event, context) {
         };
         const result = await dynamoDbLib.call("scan", params);
         result.Items.forEach(function (plugin) {
-            //To avoid S3 cache 
+            //To avoid S3 cache
             plugin.src = plugin.src + "?date=" + new Date().getTime();
         });
         return success(result.Items);
