@@ -18,6 +18,10 @@ export async function main(event, context) {
             Limit: 50
         };
         const result = await dynamoDbLib.call("scan", params);
+        result.Items.forEach(function(plugin) {
+            //To avoid S3 cache
+            plugin.src = plugin.src + "?date=" + new Date().getTime();
+        });
         return success(result.Items);
 
     } catch (err) {
